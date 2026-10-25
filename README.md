@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # School Queue Tracker
 
 ## Project structure
@@ -60,3 +61,6 @@ The `accounts`, `queue_state`, `pending_accounts`, and `activation_tokens` colle
 To use MongoDB Atlas instead, set `MONGODB_URI` in `.env` to the Atlas connection string and keep the database name in `MONGODB_DB`.
 
 The customer display arranges active service windows by count: two windows sit side by side, three place the two-window service across the top and the remaining window below, and four place Cashier windows in a left column and Registrar windows in a right column.
+=======
+# School-Queue-Tracker-AU-South
+>>>>>>> origin/main
