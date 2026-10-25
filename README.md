@@ -1,66 +1,83 @@
-<<<<<<< HEAD
 # School Queue Tracker
 
-## Project structure
-
-- `frontend/` contains the Vue application, styles, and static assets. Its only HTML file is the Vite entry shell; Vue renders all application pages.
-- `backend/` contains the Express server and its API.
-- `package.json` and `.env` stay at the project root so the app can be installed and started from one place.
-
-Vue renders each view at a clean URL such as `/my-queue`; Express serves the built Vue app for these paths. The browser also calls API endpoints such as `/api/bootstrap` on the same server.
+A web app for school administrators to manage service queues and for customers to check their ticket status.
 
 ## Run locally
 
 ### Requirements
 
-- Node.js 18 or newer
+- Git
+- Node.js 18 or newer (npm is included with Node.js)
 - MongoDB Community Server running locally, or a MongoDB Atlas connection string
 
-### Start the app
-
-Run these commands in PowerShell from the project root:
+### 1. Clone the repository
 
 ```powershell
-if (-not (Test-Path .env)) { Copy-Item .env.example .env }
-npm install
-npm start
+git clone https://github.com/hypsxux/School-Queue-Tracker-AU-South.git
+cd School-Queue-Tracker-AU-South
 ```
 
-`npm start` builds the Vue frontend and starts the Express server. Open [http://127.0.0.1:3000](http://127.0.0.1:3000) in your browser. Keep the terminal running while using the app. If port `3000` is unavailable, change `PORT` in `.env` and use the corresponding port in the browser. When using SMTP on a custom port, also set `APP_URL` to that local URL so emailed activation and reset links point to the running app.
+### 2. Configure environment
 
-The default MongoDB connection is `mongodb://127.0.0.1:27017/school_queue_tracker`. Update `MONGODB_URI` and `MONGODB_DB` in `.env` if you use a different database. The server reads `.env` from the project root even though its code lives in `backend/`.
+Create a local environment file from the example:
 
-Admin registration sends a one-time activation link that expires after 24 hours, so configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and `EMAIL_FROM` in `.env` to enable email delivery. For Gmail, use a Google App Password; do not use your normal account password. `APP_URL` should be set to the public HTTPS address when deploying outside localhost.
+```powershell
+Copy-Item .env.example .env
+```
 
-The login page's **Forgot password?** flow emails a single-use reset link to the address on the administrator account. Reset links expire after 30 minutes. Email settings must be configured for password reset emails to be sent.
-
-MongoDB is the source of truth for accounts, queue data, and pending registration. Browser storage is refreshed from MongoDB on page load; clearing MongoDB will not restore old records from a browser cache. Data opened previously through `file://` is isolated by the browser and is not available to the localhost app.
-
-Administrator sessions expire five hours after sign-in. Shared queue members are removed when the owner logs out, starts a new independent queue, or stops sending presence heartbeats for 90 seconds. Members are notified and returned to the dashboard when their joined window closes.
-
-Leaving the My Queue page asks for confirmation. Confirming removes the current queue window; leaving an owner queue also removes its joined windows. The customer display checks for its queue ending, attempts to close its tab, and exits to the sign-in page if the browser blocks tab closure. Closing or reloading the browser tab uses the browser's native leave-page confirmation, since browsers do not allow custom dialogs during tab closure.
-
-When joining with a code, select a service type and an available window. Windows already used by an active queue are disabled in both Queue Setup and the dashboard shortcut.
-
-Queue owners can jump to any positive whole ticket number from My Queue, including a number completed earlier. Recalling a completed number records a new service event. After the jump ticket is completed, the queue continues sequentially from the next number; existing waiting tickets do not interrupt this run. Numbers currently being served at another window are skipped.
-
-## Why this stack instead of PHP?
-
-The existing application uses JavaScript in the browser and Node.js/Express on the server. Using JavaScript on both sides keeps the current API and app behavior together and avoids introducing a second runtime. PHP could serve the same role, but adopting it would require rewriting the Express API and its MongoDB/email integration; it is a valid alternative, not a requirement for URL navigation.
-
-## MongoDB Compass
-
-Connect Compass with:
+The defaults connect to a MongoDB server on this computer:
 
 ```text
-mongodb://127.0.0.1:27017/school_queue_tracker
+MONGODB_URI=mongodb://127.0.0.1:27017/school_queue_tracker
+MONGODB_DB=school_queue_tracker
+HOST=127.0.0.1
+PORT=3000
+APP_URL=http://127.0.0.1:3000
 ```
 
-The `accounts`, `queue_state`, `pending_accounts`, and `activation_tokens` collections are created on startup. This local setup is intended for development; configure authentication and access controls before exposing the server or database to a network.
+Make sure MongoDB is running before starting the app. For MongoDB Atlas, set `MONGODB_URI` in `.env` to your connection string.
 
-To use MongoDB Atlas instead, set `MONGODB_URI` in `.env` to the Atlas connection string and keep the database name in `MONGODB_DB`.
+Admin registration requires email activation. To register an account, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and `EMAIL_FROM` in `.env`. Password reset emails use the same settings. Keep `.env` private; do not commit it to GitHub.
 
-The customer display arranges active service windows by count: two windows sit side by side, three place the two-window service across the top and the remaining window below, and four place Cashier windows in a left column and Registrar windows in a right column.
-=======
-# School-Queue-Tracker-AU-South
->>>>>>> origin/main
+### 3. Install dependencies and start
+
+Run these commands from the repository folder:
+
+```powershell
+npm ci
+npm run start
+```
+
+The start command builds the frontend and launches the Express backend. Keep the terminal open while using the app. Visit [http://127.0.0.1:3000](http://127.0.0.1:3000) on the computer running the app. Press **Ctrl+C** in the terminal to stop it.
+
+If you use `npm install` instead of `npm ci`, start the app with `npm start`; both start commands run the same script.
+
+### Use from a phone on the same Wi-Fi (optional)
+
+The default `HOST=127.0.0.1` only accepts connections from the computer running the app. For temporary local-network testing, change it to `HOST=0.0.0.0` in `.env`, restart the app, then open `http://<computer-LAN-IP>:3000` on the computer and phone. Find the computer's LAN IP with `ipconfig` on Windows. Reopen the customer display from that address so its QR code uses the LAN address. Windows Firewall may ask you to allow Node.js on a private network. Do not expose the development server or MongoDB directly to the public internet.
+
+## User guide
+
+There are two user roles: **Admin** manages queues; **Customer** checks a ticket.
+
+### Admin
+
+1. Open the app and select **Register here**. Complete registration and activate the account using the link sent by email. If no account exists yet, SMTP must be configured for activation email.
+2. Sign in with the administrator ID and password.
+3. Select **Start Queue**, choose a service (Cashier or Registrar) and an available window, then start the queue.
+4. In **My Queue**, select **Start the Queue** to call the first ticket. Use **Served** or **No Show** to record the current ticket and call the next one.
+5. Select **Share** to open the customer display or share the queue join code with another administrator. A joined administrator selects a service and an available window; occupied windows cannot be selected.
+6. Use **Jump to number** to call a specific whole ticket number. Only the queue owner can jump. After a jump, the queue continues from the following number; already completed numbers and numbers active at another window are skipped. Use **Restart queue** to clear the waiting line and restart numbering.
+7. Use **Dashboard** to review completed-service totals and charts. Use **Profile** to update account details, and **Logout** to end the session.
+
+### Customer
+
+1. Get a ticket number from the service desk.
+2. Scan the QR code on the customer display, or click the QR code when viewing the app in a browser.
+3. On the customer page, choose the ticket's service type and enter the ticket number. Select **Confirm**.
+4. The ticket page shows the customer's number, the current number being served, and the estimated wait. Keep or bookmark the page to check updates.
+5. A ticket already completed in that queue cannot be submitted again by a customer. Contact the service desk if the ticket details are incorrect.
+
+## Data and privacy
+
+MongoDB stores accounts and queue data and is the source of truth when the app loads. The default local database is `school_queue_tracker`. The server creates its application collections on startup. Do not store secrets in the repository; `.env` and generated frontend build files are ignored by Git.
