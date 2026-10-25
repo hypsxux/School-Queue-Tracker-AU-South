@@ -1,0 +1,21 @@
+{
+  "name": "school-queue-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "School Queue Tracker with MongoDB persistence",
+  "scripts": {
+    "build": "vite build --config frontend/vite.config.js",
+    "start": "npm run build && node backend/server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongodb": "^6.17.0",
+    "nodemailer": "^10.2.1",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "vite": "^6.0.7"
+  }
+}
